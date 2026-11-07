@@ -54,10 +54,12 @@ jobs:
           cargo fmt --manifest-path tests/consumer/Cargo.toml --all -- --check
 
       - name: Test SDK
-        run: cargo test --locked
+        run: |
+          cargo test --locked
+          cargo test --locked --all-features
 
       - name: Check examples
-        run: cargo check --locked --examples
+        run: cargo check --locked --examples --all-features
 
       - name: Run offline examples
         run: |
@@ -65,17 +67,17 @@ jobs:
           cargo run --locked --example agent -- cancel
           cargo run --locked --example agent -- inputs
           cargo run --locked --example agent -- continue
+          cargo run --locked --example session_offline --all-features
 
       - name: Build API documentation
         env:
           RUSTDOCFLAGS: -D warnings
-        run: cargo doc --locked --no-deps
+        run: cargo doc --locked --no-deps --all-features
 
       - name: Test independent consumer
         run: cargo test --locked --manifest-path tests/consumer/Cargo.toml
 
       - name: Verify distributable package
-        if: runner.os == 'Linux'
         run: |
           cargo package --locked
-          python scripts/check-agent-sdk.py --package target/package/kivio-agent-sdk-*.crate
+          python scripts/check-agent-sdk.py --package target/package/kivio-agent-sdk-*.crate --test-consumer
